@@ -1,0 +1,24 @@
+npm install react-icons
+npm install prop-types
+npm install --save-dev typescript@latest @types/react@latest @types/react-dom@latest
+npm install typescript@4.9.5 --save-dev
+npm install --save @types/dom-speech-recognition
+
+https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition
+https://www.npmjs.com/package/@types/dom-speech-recognition
+
+
+Latest piper-voices can be downloaded from - https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/lessac/medium
+
+
+# Run this on your host machine once to download the model into the volume:
+docker run -it --rm -v ./ollama_data:/root/.ollama ollama/ollama pull mistral
+
+# Run in root
+docker compose up --build
+
+
+React Frontend: http://localhost:3000
+
+Flask Backend: http://localhost:5000
+http://ollama:11434

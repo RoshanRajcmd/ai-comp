@@ -1,0 +1,70 @@
+version: '3.9'
+
+services:
+  # 1. Ollama Service (The LLM)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    # Ollama needs access to the host's GPU if you have one, or standard volume for models
+    volumes:
+      - ./ollama_data:/root/.ollama  # Persistent storage for models
+    ports:
+      - "11434:11434" # Default Ollama API port
+    command: /usr/bin/ollama serve # Start the server
+    # Healthcheck to ensure the container is ready before the backend starts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    # Optional: If you have a GPU, uncomment the lines below for hardware acceleration
+    # environment:
+    #   - OLLAMA_HOST=0.0.0.0
+    # deploy:
+    #   resources:  
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # 2. Backend Service (Flask + Whisper/Piper)
+  backend:
+    build:
+      context: ./backend # Path to your backend directory
+      dockerfile: Dockerfile
+    container_name: backend
+    # Flask will run on port 5000 inside the container
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app # Mount the code for live reloading (optional)
+      - ./models:/app/models # Mount Piper voice models
+    environment:
+      - FLASK_ENV=development
+      - OLLAMA_API_URL=http://ollama:11434 # Reference the Ollama service name
+    # Ensure the backend waits until Ollama is running and healthy
+    depends_on:
+      ollama:
+        condition: service_healthy
+    # command: gunicorn -w 4 -b 0.0.0.0:5000 app:app # Use Gunicorn for production
+    command: python app.py # Use Flask dev server for development ease
+
+  # 3. Frontend Service (React UI)
+  frontend:
+    build:
+      context: ./frontend # Path to your frontend directory
+      dockerfile: Dockerfile
+    container_name: frontend
+    # React will run on port 3000 inside the container
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app # Mount the code for live reloading
+      - /app/node_modules # Necessary to prevent host node_modules from overwriting container's
+    environment:
+      - NODE_ENV=development
+      # Tell React where the Flask API is located (from the browser's perspective)
+      - REACT_APP_API_URL=http://localhost:5000
+    depends_on:
+      - backend

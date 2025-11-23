@@ -1,0 +1,13 @@
+# --- Core Web Framework ---
+Flask==3.0.3                   # The main web framework
+Flask-CORS==4.0.0              # Essential for connecting React (port 3000) to Flask (port 5000)
+
+# --- LLM and Audio Processing ---
+ollama==0.2.1                  # Python client for communicating with the local Ollama server
+faster-whisper==10.0.0         # Highly efficient Speech-to-Text (STT) model
+piper-tts==1.2.0               # Text-to-Speech (TTS) engine
+
+# --- Audio I/O and Scientific Computing ---
+sounddevice==0.4.6             # Interface for microphone input and speaker output
+scipy==1.13.0                  # Scientific computing library (often needed by audio packages)
+numpy==1.26.4                  # Fundamental package for scientific computing with Python

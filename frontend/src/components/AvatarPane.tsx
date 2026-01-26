@@ -1,29 +1,36 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaMicrophone } from "react-icons/fa";
-import { FaSquare } from "react-icons/fa";
 import { AVT_EXPRESSIONS } from './Constants';
-import { default as languageCodesData } from '@/data/language-codes.json';
-import { default as countryCodesData } from '@/data/country-codes.json';
+
+declare global {
+    interface Window {
+        SpeechRecognition: any;
+        webkitSpeechRecognition: any;
+    }
+}
+
+const MicrophoneIcon = () => (
+    <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-800">
+        <path d="M12 1a3 3 0 0 0-3 3v12a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+    </svg>
+);
+
+const StopIcon = () => (
+    <svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor" className="text-gray-800">
+        <rect x="6" y="6" width="12" height="12"></rect>
+    </svg>
+);
 
 export default function AvatarPane() {
-    const recognitionRef = useRef<SpeechRecognition>();
+    const recognitionRef = useRef<SpeechRecognition | null>(null);
 
     const [action, setAction] = useState("");
     const [imageSrc, setImageSrc] = useState(AVT_EXPRESSIONS["netural"]);
     const [isActive, setIsActive] = useState<boolean>(false);
-    const [text, setText] = useState<string>();
-    const [response, setResponse] = useState<string>();
     const [voices, setVoices] = useState<Array<SpeechSynthesisVoice>>();
     const [language, setLanguage] = useState<string>('pt-BR');
-
-
-    const changeImage = () => {
-        setImageSrc(AVT_EXPRESSIONS["happy"]);
-    };
-
-    async function sleep(ms: number): Promise<void> {
-        return new Promise((resolve) => setTimeout(resolve, ms));
-    }
 
     const availableVoices = voices?.filter(({ lang }) => lang === language);
     const activeVoice =
@@ -63,31 +70,28 @@ export default function AvatarPane() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognitionRef.current = new SpeechRecognition();
 
-        recognitionRef.current.onstart = function () {
+        recognitionRef.current!.addEventListener('start', function () {
             setIsActive(true);
-        }
+        });
 
-        recognitionRef.current.onend = function () {
+        recognitionRef.current!.addEventListener('end', function () {
             setIsActive(false);
-        }
+        });
 
-        recognitionRef.current.onresult = async function (event) {
+        recognitionRef.current!.addEventListener('result', async function (event: any) {
             const transcript = event.results[0][0].transcript;
-
-            setText(transcript);
 
             // const results = await fetch('/api/processInput', {
             //     method: 'POST',
             //     body: JSON.stringify({
             //     })
             // }).then(r => r.json());
-            const results = { text: "Test response" }
-            setResponse(results.text);
+            const results = { text: "Test response" };
 
             speak(results.text);
-        }
+        });
 
-        recognitionRef.current.start();
+        recognitionRef.current!.start();
     }
 
     function speak(text: string) {
@@ -110,6 +114,7 @@ export default function AvatarPane() {
                     <img
                         src={imageSrc}
                         className='size-60 object-cover'
+                        alt='AI Avatar'
                     />
                 </div>
                 <div className="text-[10px] text-gray-400 mt-1">
@@ -118,10 +123,10 @@ export default function AvatarPane() {
             </div>
             <div className="flex flex-col justify-center items-center">
                 <button className="w-fit bg-white rounded-full p-6 shadow-sm text-sm hover:bg-slate-100" onClick={handleMicPress}>
-                    {action == "Speaking" ? <FaSquare size='25px' /> : <FaMicrophone size='25px' />}
+                    {action === "Speaking" ? <StopIcon /> : <MicrophoneIcon />}
                 </button>
                 {/* there are 3 state for action - listening, speaking, null (shows Press to Speak) */}
-                <span className="text-sm font-light text-gray-500 py-6">{action == "" ? "Press to Speak" : action}</span>
+                <span className="text-sm font-light text-gray-500 py-6">{action === "" ? "Press to Speak" : action}</span>
             </div>
         </div >
     );

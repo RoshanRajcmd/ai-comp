@@ -15,7 +15,7 @@ WORKDIR /app
 
 # Copy requirements file and install dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Stage 2: Final Runtime Stage
 FROM python:3.11-slim

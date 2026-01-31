@@ -1,8 +1,11 @@
-export interface ChatMessage {
-    id: number;
-    sender: "user" | "bot";
-    text: string;
+export type ChatMessage = {
+    id: number
+    sender: "user" | "bot"
+    text: string
+    emotion?: string
+    intensity?: number
 }
+
 
 export interface History {
     id: number;

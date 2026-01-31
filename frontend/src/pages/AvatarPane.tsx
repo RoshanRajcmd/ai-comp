@@ -31,6 +31,12 @@ export default function AvatarPane() {
     const [isActive, setIsActive] = useState<boolean>(false);
     const [voices, setVoices] = useState<Array<SpeechSynthesisVoice>>();
     const [language, setLanguage] = useState<string>('pt-BR');
+    // const lastBotMessage = [...messages]
+    //     .reverse()
+    //     .find(m => m.sender === "bot");
+    // const emotion = lastBotMessage?.emotion || "neutral";
+    // const intensity = lastBotMessage?.intensity || 0.5;
+
 
     const availableVoices = voices?.filter(({ lang }) => lang === language);
     const activeVoice =
@@ -99,10 +105,18 @@ export default function AvatarPane() {
         window.speechSynthesis.speak(utterance);
     }
 
+    function get_settings() {
+        //TODO: Fetch from backend
+        return {
+            mode: "neuro",
+            chaos: 0.5,
+        }
+    }
+
     return (
         <div className="flex-1 rounded-2xl shadow-lg flex flex-col w-1/2 mx-4 my-4 bg-[#EAEAF3] border-r border-gray-200 p-4">
             <h2 className="text-xl font-semibold pb-2">Ai Companion bot</h2>
-            <p className="text-xs text-gray-500 mb-1">Offline Model: Mistral from ollama</p>
+            <p className="text-xs text-gray-500 mb-1">Model: {get_settings().mode} Persona: {get_settings().chaos}</p>
 
             <div className="flex-1 my-6 p-6 bg-white rounded-lg shadow-sm text-sm text-gray-700 text-center">
                 <div className='w-full flex items-center justify-center'>

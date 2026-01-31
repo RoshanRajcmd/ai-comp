@@ -16,6 +16,7 @@ const CopyIcon = () => (
     </svg>
 );
 
+
 export default function ChatMessages() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
 
@@ -59,20 +60,23 @@ export default function ChatMessages() {
 
             const data = await response.json();
 
-            if (data.success) {
-                // Add bot response to chat
+            if (data.text) {
+                // Add bot response to chat (assuming backend returns text, emotion, intensity directly)
                 const botMsg: ChatMessage = {
                     id: messages.length + 2,
                     sender: "bot",
-                    text: data.response
+                    text: data.text,
+                    emotion: data.emotion,
+                    intensity: data.intensity
                 };
+
                 setMessages(prev => [...prev, botMsg]);
             } else {
                 // Add error message to chat
                 const errorMsg: ChatMessage = {
                     id: messages.length + 2,
                     sender: "bot",
-                    text: `Error: ${data.error}`
+                    text: `Error: ${data.error || 'Unknown error'}`
                 };
                 setMessages(prev => [...prev, errorMsg]);
                 console.error('Backend error:', data.error);

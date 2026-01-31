@@ -14,3 +14,4 @@ numpy==1.26.4                  # Fundamental package for scientific computing wi
 
 python-dotenv==1.0.0          # For loading environment variables from a .env file
 requests==2.31.0              # For making HTTP requests to Ollama API
+pydantic==2.10.6              # For data validation and settings management

@@ -1,18 +1,12 @@
-import AvatarPane from "./components/AvatarPane";
-import ChatMessages from "./components/ChatMessages";
-import ChatHistory from "./components/ChatHistory";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
 
 export default function App() {
-
   return (
-    <div className="flex max-h-screen bg-gradient-to-br from-indigo-200 to-blue-200">
-      <AvatarPane />
-
-      {/* Sidebar  */}
-      <div className="flex-1 flex flex-col bg-white">
-        <ChatMessages />
-        <ChatHistory />
-      </div>
-    </div >
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import React from "react";
-import { ChatMessage } from "./Types";
+import { ChatMessage } from "../types/Types";
 
 const SendIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
@@ -15,7 +15,6 @@ const CopyIcon = () => (
         <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
     </svg>
 );
-//import ChatInput from "./ChatInput";
 
 export default function ChatMessages() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);

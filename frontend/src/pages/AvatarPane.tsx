@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { AVT_EXPRESSIONS } from './Constants';
+import { AVT_EXPRESSIONS } from '../Constants';
 
 declare global {
     interface Window {
@@ -53,11 +53,6 @@ export default function AvatarPane() {
     }, []);
 
     function handleMicPress() {
-        // setAction("Listening")
-        // await sleep(2000)
-        // setAction("Speaking")
-        // await sleep(2000)
-        // setAction("")
 
         if (isActive) {
             recognitionRef.current?.stop();

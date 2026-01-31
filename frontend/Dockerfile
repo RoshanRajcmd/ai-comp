@@ -1,12 +1,12 @@
 # Use a Node image to build and run the React app
-FROM node:20-alpine as builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
 # Copy package files and install dependencies
 COPY package.json .
 COPY package-lock.json .
-RUN npm install --save-dev typescript@latest @types/react@latest @types/react-dom@latest react-icons
+RUN npm install --save-dev typescript@latest @types/react@latest @types/react-dom@latest react-icons react-router-dom --legacy-peer-deps
 
 # Copy all application code
 COPY . .

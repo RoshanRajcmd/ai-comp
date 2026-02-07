@@ -1,9 +1,19 @@
+export type Emotion =
+    | "neutral"
+    | "happy"
+    | "angry"
+    | "sad"
+    | "excited"
+    | "proud"
+    | "unpleasant"
+    | "error";
+
+
 export type ChatMessage = {
     id: number
     sender: "user" | "bot"
     text: string
-    emotion?: string
-    intensity?: number
+    emotion?: Emotion
 }
 
 

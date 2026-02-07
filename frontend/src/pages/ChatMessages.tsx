@@ -1,6 +1,5 @@
-import { useState } from "react";
-import React from "react";
-import { ChatMessage } from "../types/Types";
+import React, { useState } from "react";
+import { ChatMessage, Emotion } from "../types/Types";
 
 const SendIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
@@ -16,8 +15,11 @@ const CopyIcon = () => (
     </svg>
 );
 
+interface ChatMessagesProps {
+    onEmotionChange: (emotion: Emotion) => void;
+}
 
-export default function ChatMessages() {
+export default function ChatMessages({ onEmotionChange }: ChatMessagesProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
 
     const [message, setMessage] = useState<string>("");
@@ -59,17 +61,18 @@ export default function ChatMessages() {
             });
 
             const data = await response.json();
-
+            console.log('Backend response:', data);
             if (data) {
                 const botMsg: ChatMessage = {
                     id: messages.length + 2,
                     sender: "bot",
                     text: data.text,
                     emotion: data.emotion,
-                    intensity: data.intensity
                 };
 
+                onEmotionChange(data.emotion);
                 setMessages(prev => [...prev, botMsg]);
+
             } else {
                 // Add error message to chat
                 const errorMsg: ChatMessage = {
@@ -78,6 +81,7 @@ export default function ChatMessages() {
                     text: `Error: ${data.error || 'Unknown error'}`
                 };
                 setMessages(prev => [...prev, errorMsg]);
+                onEmotionChange("error");
                 console.error('Backend error:', data.error);
             }
         } catch (error) {

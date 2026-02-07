@@ -10,8 +10,7 @@ services:
       - ./ollama_data:/root/.ollama  # Persistent storage for models
     ports:
       - "11434:11434" # Default Ollama API port
-    command: serve # Start the server
-    # Healthcheck to ensure the container is ready before the backend starts
+    command: serve
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
       interval: 30s

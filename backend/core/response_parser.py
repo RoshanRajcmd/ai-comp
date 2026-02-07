@@ -2,8 +2,7 @@ import json
 
 DEFAULT_RESPONSE = {
     "text": "",
-    "emotion": "neutral",
-    "intensity": 0.5
+    "emotion": "neutral"
 }
 
 def parse_llm_response(raw: str):
@@ -12,8 +11,7 @@ def parse_llm_response(raw: str):
 
         return {
             "text": data.get("text", ""),
-            "emotion": data.get("emotion", "neutral"),
-            "intensity": float(data.get("intensity", 0.5))
+            "emotion": data.get("emotion", "neutral")
         }
 
     except Exception:

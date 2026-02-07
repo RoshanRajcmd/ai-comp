@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { AVT_EXPRESSIONS } from '../Constants';
+import { Emotion } from '../types/Types';
 
 declare global {
     interface Window {
@@ -23,19 +24,18 @@ const StopIcon = () => (
     </svg>
 );
 
-export default function AvatarPane() {
+interface AvatarPaneProps {
+    emotion: Emotion;
+}
+
+export default function AvatarPane({ emotion }: AvatarPaneProps) {
     const recognitionRef = useRef<SpeechRecognition | null>(null);
 
     const [action, setAction] = useState("");
-    const [imageSrc, setImageSrc] = useState(AVT_EXPRESSIONS["netural"]);
+    const [imageSrc, setImageSrc] = useState(AVT_EXPRESSIONS[emotion]);
     const [isActive, setIsActive] = useState<boolean>(false);
     const [voices, setVoices] = useState<Array<SpeechSynthesisVoice>>();
     const [language, setLanguage] = useState<string>('pt-BR');
-    // const lastBotMessage = [...messages]
-    //     .reverse()
-    //     .find(m => m.sender === "bot");
-    // const emotion = lastBotMessage?.emotion || "neutral";
-    // const intensity = lastBotMessage?.intensity || 0.5;
 
 
     const availableVoices = voices?.filter(({ lang }) => lang === language);
@@ -121,9 +121,9 @@ export default function AvatarPane() {
             <div className="flex-1 my-6 p-6 bg-white rounded-lg shadow-sm text-sm text-gray-700 text-center">
                 <div className='w-full flex items-center justify-center'>
                     <img
-                        src={imageSrc}
-                        className='size-60 object-cover'
-                        alt='AI Avatar'
+                        src={AVT_EXPRESSIONS[emotion]}
+                        alt={emotion}
+                        className='size-60 object-cover transition-all duration-300'
                     />
                 </div>
                 <div className="text-[10px] text-gray-400 mt-1">

@@ -17,6 +17,11 @@ docker run -it --rm -v ./ollama_data:/root/.ollama ollama/ollama pull mistral
 # Run in root
 docker compose up --build
 
+# Run components individually
+cd <component_directory>
+docker build frontend .
+docker run -d -p 3000:3000 frontend
+
 
 React Frontend: http://localhost:3000
 

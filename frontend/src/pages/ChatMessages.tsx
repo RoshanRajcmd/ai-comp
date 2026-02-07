@@ -60,8 +60,7 @@ export default function ChatMessages() {
 
             const data = await response.json();
 
-            if (data.text) {
-                // Add bot response to chat (assuming backend returns text, emotion, intensity directly)
+            if (data) {
                 const botMsg: ChatMessage = {
                     id: messages.length + 2,
                     sender: "bot",

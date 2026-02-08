@@ -1,76 +1,191 @@
+# Lumi
+
+An **AI-powered personalized assistant** that helps users manage tasks, provides **personalized recommendations**, and supports **preset personas** using **open-sourced and custom MCP servers**.
+Lumi supports both **text and voice interactions**, combining modern web technologies with AI inference pipelines.
+
+---
+
+## ⚙️ Source Code
+
+> Multi-component architecture
+
+* **React Frontend** – Web UI with text & voice interaction
+* **Flask Backend** – API layer and AI orchestration
+* **Ollama (LLM Runtime)** – Local model inference
+* **Dockerized Services** – Unified orchestration via Docker Compose
+
+---
+
+## 📚 Tech Stack and Packages
+
+### Frontend
+
+* React (Create React App)
+* TypeScript
+* React Icons
+* PropTypes
+* Web Speech API (SpeechRecognition)
+
+### Backend
+
+* Flask (Python)
+
+### AI / Voice
+
+* Ollama
+* Llama-3.2-8B LLM
+* Piper TTS Voices
+
+### DevOps
+
+* Docker
+* Docker Compose
+
+---
+
+### 📦 NPM Packages Installed
+
+```bash
 npm install react-icons
 npm install prop-types
 npm install --save-dev typescript@latest @types/react@latest @types/react-dom@latest
 npm install typescript@4.9.5 --save-dev
 npm install --save @types/dom-speech-recognition
+```
 
-https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition
-https://www.npmjs.com/package/@types/dom-speech-recognition
+---
 
+## 🎛️ Features
 
-Latest piper-voices can be downloaded from - https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/lessac/medium
+1. AI-powered personalized assistant
+2. Task management and intelligent recommendations
+3. Preset and customizable personas
+4. Text-based interaction
+5. Voice input using Web Speech API
+6. Voice output using Piper TTS voices
+7. Local LLM inference using Ollama
+8. Modular architecture using MCP servers
+9. Fully Dockerized development environment
 
+---
 
-# Run this on your host machine once to download the model into the volume:
-docker run -it --rm -v ./ollama_data:/root/.ollama ollama/ollama pull mistral
+## 🧑‍💻 Developer Setup
 
-# Run in root
+### 🔊 Voice Recognition (Web Speech API)
+
+Uses the browser’s native Speech Recognition API.
+
+📘 References:
+
+* MDN Documentation:
+  [https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition)
+* Type Definitions:
+  [https://www.npmjs.com/package/@types/dom-speech-recognition](https://www.npmjs.com/package/@types/dom-speech-recognition)
+
+---
+
+### 🗣️ Text-to-Speech (Piper Voices)
+
+Latest Piper voice models can be downloaded from:
+
+[https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/lessac/medium](https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/lessac/medium)
+
+---
+
+### 🧠 LLM Setup (Ollama)
+
+#### Download the Model (Run Once on Host Machine)
+
+```bash
+docker run -it --rm -v ./ollama_data:/root/.ollama ollama/ollama pull Llama-3.2-8B
+```
+
+This downloads the **Llama-3.2-8B** model into a persistent Docker volume.
+
+---
+
+### 🐳 Running with Docker (Recommended)
+
+#### Run from Project Root
+
+```bash
 docker compose up --build
+```
 
-# Run components individually
+This will start:
+
+* React Frontend
+* Flask Backend
+* Ollama LLM service
+
+---
+
+### 🧩 Running Components Individually
+
+```bash
 cd <component_directory>
 docker build frontend .
 docker run -d -p 3000:3000 frontend
+```
 
+---
 
-React Frontend: http://localhost:3000
+### 🌐 Service URLs
 
-Flask Backend: http://localhost:5000
-http://ollama:11434
+| Service        | URL                                            |
+| -------------- | ---------------------------------------------- |
+| React Frontend | [http://localhost:3000](http://localhost:3000) |
+| Flask Backend  | [http://localhost:5000](http://localhost:5000) |
+| Ollama API     | [http://ollama:11434](http://ollama:11434)     |
 
-# Getting Started with Create React App
+---
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## ⚛️ React Application Scripts
 
-## Available Scripts
-
-In the project directory, you can run:
+This project was bootstrapped using **Create React App**.
 
 ### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Runs the app in development mode.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+* Auto reload on file changes
+* Lint errors shown in console
+
+---
 
 ### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Runs the test runner in interactive watch mode.
+
+---
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Builds the app for production into the `build` folder.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* Optimized production build
+* Minified output
+* Hashed filenames
+* Ready for deployment
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
 ### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+⚠️ **One-way operation**
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+* Exposes all build configs (Webpack, Babel, ESLint, etc.)
+* Cannot be undone
+* Use only if deep customization is required
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+---
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## 📖 Learn More
 
-## Learn More
+* Create React App Docs:
+  [https://facebook.github.io/create-react-app/docs/getting-started](https://facebook.github.io/create-react-app/docs/getting-started)
+* React Documentation:
+  [https://reactjs.org/](https://reactjs.org/)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-To learn React, check out the [React documentation](https://reactjs.org/).

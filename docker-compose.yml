@@ -40,14 +40,13 @@ services:
       - ./backend:/app # Mount the code for live reloading (optional)
       - ./models:/app/models # Mount Piper voice models
     environment:
-      - FLASK_ENV=development
       - OLLAMA_API_URL=http://ollama:11434 # Reference the Ollama service name
     # Ensure the backend waits until Ollama is running and healthy
     depends_on:
       ollama:
         condition: service_healthy
     # command: gunicorn -w 4 -b 0.0.0.0:5000 app:app # Use Gunicorn for production
-    command: python app.py # Use Flask dev server for development ease
+    command: python -u app.py # Use Flask dev server for development ease
 
   # 3. Frontend Service (React UI)
   frontend:

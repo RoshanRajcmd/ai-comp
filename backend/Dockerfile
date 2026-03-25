@@ -1,5 +1,5 @@
 # Stage 1: Build Stage (Needed for compiling certain Python packages)
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Install necessary build tools and audio libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \

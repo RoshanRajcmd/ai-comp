@@ -6,4 +6,3 @@ FLASK_ENV=development
 
 # URL for the Ollama API, referencing the service name used in docker-compose.yml
 # This is crucial for your backend to find the Ollama container when running via Docker Compose.
-OLLAMA_API_URL=http://ollama:11434

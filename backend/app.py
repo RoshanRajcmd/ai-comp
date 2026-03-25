@@ -1,64 +1,106 @@
-from core.response_parser import parse_llm_response
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from core.llm_client import OllamaClient
-from settings.schema import Settings
-from settings.store import get_settings, update_settings
+
+from utils.llm_client import OllamaClient
+from chat_history import get_chat_history
+from settings import Settings, get_settings, update_settings
 
 app = Flask(__name__)
 CORS(app)
 
-# Initialize Ollama client
-ollama_client = OllamaClient()
+# --------------------------------------------------
+# Initialize Core Services
+# --------------------------------------------------
 
-@app.route('/hello/<name>')
-def hello_name(name):
-    return 'Hello %s!' % name
+settings = get_settings()
+chat_history = get_chat_history()
+ollama_client = OllamaClient(model=settings.text_model, chat_history=chat_history)
 
-@app.route('/api/chat', methods=['POST'])
+
+# --------------------------------------------------
+# Chat Endpoint
+# --------------------------------------------------
+
+@app.post("/api/chat")
 def chat():
-    """
-    Receive a user message, send it to Ollama AI, and return the bot response.
-    Expected JSON: {"message": "user input text"}
-    """
     try:
-        data = request.get_json()
-        user_message = data.get('message', '').strip()
-        
-        if not user_message:
-            return jsonify({'error': 'Message cannot be empty'}), 400
-        
+        data = request.json
+        if not data:
+            return jsonify({"error": "Invalid JSON"}), 400
+
+        user_prompt = data.get("prompt", "").strip()
+
+        if not user_prompt:
+            return jsonify({"error": "Message cannot be empty"}), 400
+
         # Check model availability
         if not ollama_client.check_model_availability():
-            return jsonify({'error': 'llama3.2:3b model not found. Please pull it first with: ollama pull llama3.2:3b'}), 500
-        
+            return jsonify({
+                "error": f"Model '{ollama_client.model}' not found. Run: ollama pull {ollama_client.model}"
+            }), 500
+
         # Generate response
-        raw = ollama_client.generate_response(user_message)
-        parsed = parse_llm_response(raw)
-        
-        return jsonify(parsed), 200
-        
+        response = ollama_client.chat(user_prompt)
+
+        return jsonify(response), 200
+
     except Exception as e:
-        return jsonify({'error': f'Error: {str(e)}'}), 500
+        return jsonify({"error": str(e)}), 500
 
-@app.route("/api/health")
-def health():
-    if not hasattr(ollama_client, "health_check"):
-        return jsonify({"status": "error", "message": "health_check not implemented"}), 500
-    return jsonify(ollama_client.health_check()), 200
+# Fetch List of downloaded models in the container
+@app.get("/api/list")
+def fetch_available_models():
+    response = ollama_client.list_models()
+    return jsonify(response), 200
 
+# --------------------------------------------------
+# Fetch Chat History
+# --------------------------------------------------
+
+@app.get("/api/history")
+def fetch_history():
+    return jsonify({
+        "permanent_memory": chat_history.permanent_memory,
+        "session_memory": chat_history.session_memory
+    }), 200
+
+
+# --------------------------------------------------
+# Settings
+# --------------------------------------------------
 
 @app.get("/api/settings")
 def fetch_settings():
-    return jsonify(get_settings().dict()), 200
+    return jsonify(get_settings().model_dump()), 200
+
 
 @app.post("/api/settings")
 def save_settings():
     data = request.json
-    settings = Settings(**data)
-    update_settings(settings)
-    return jsonify(settings.dict()), 200
+
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    try:
+        new_settings = Settings(**data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+    changed_fields = update_settings(new_settings)
+
+    # If model or personality changed → refresh system prompt
+    if "text_model" in changed_fields:
+        ollama_client.model = new_settings.text_model
+
+    if "personality" in changed_fields or "mode" in changed_fields:
+        ollama_client.refresh_system_prompt()
+
+    return jsonify(get_settings().model_dump()), 200
 
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+# --------------------------------------------------
+# App Start
+# --------------------------------------------------
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)

@@ -31,7 +31,9 @@ def load_settings() -> Settings:
         if os.path.exists(CONFIG_PATH):
             with open(CONFIG_PATH, "r") as f:
                 user_config = json.load(f)
-                config.update(user_config)
+                print(f"Loaded user config: {user_config}")
+                if user_config:
+                    config.update(user_config)
         else:
             print("Config.json does not exist. Using default configuration")
     except Exception as e:
@@ -40,8 +42,10 @@ def load_settings() -> Settings:
     return Settings(**config)
 
 def save_settings_to_file(settings: Settings):
+    print(f"Saving settings to: {CONFIG_PATH}")
     with open(CONFIG_PATH, "w") as f:
         json.dump(settings.model_dump(), f, indent=4)
+    print("Settings persisted successfully.")
 
 def detect_changes(old: Settings, new: Settings):
     changes = {}
@@ -51,6 +55,7 @@ def detect_changes(old: Settings, new: Settings):
 
     for key in new_dict:
         if old_dict.get(key) != new_dict.get(key):
+            print("Found Changes in setting")
             changes[key] = {
                 "old": old_dict.get(key),
                 "new": new_dict.get(key)
@@ -64,9 +69,9 @@ def update_settings(new_settings: Settings):
     old_settings = _settings
     changed = detect_changes(old_settings, new_settings)
 
-    _settings = new_settings
-    save_settings_to_file(_settings)
-
+    save_settings_to_file(new_settings)
+    _settings = load_settings()
+    print("Settings Changes with new setting", _settings)
     return changed
 
 # Global singleton
@@ -76,4 +81,5 @@ def get_settings() -> Settings:
     if _settings is None:
         _settings = load_settings()
         print("Initial load of setting is successfull")
+    print("Fetched setting: ", _settings)
     return _settings

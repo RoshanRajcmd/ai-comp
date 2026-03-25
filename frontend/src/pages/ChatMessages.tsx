@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ChatMessage, Emotion } from "../types/Types";
 
 const SendIcon = () => (
@@ -21,9 +21,14 @@ interface ChatMessagesProps {
 
 export default function ChatMessages({ onEmotionChange }: ChatMessagesProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-
     const [message, setMessage] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll to bottom when new messages arrive
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
 
     // Check backend health on component mount
     React.useEffect(() => {
@@ -50,6 +55,8 @@ export default function ChatMessages({ onEmotionChange }: ChatMessagesProps) {
         setMessage("");
         setLoading(true);
 
+        console.log('Sending message:', message);
+
         try {
             // Send message to backend
             const response = await fetch('http://localhost:5000/api/chat', {
@@ -57,7 +64,7 @@ export default function ChatMessages({ onEmotionChange }: ChatMessagesProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: message })
+                body: JSON.stringify({ prompt: message })
             });
 
             const data = await response.json();
@@ -66,11 +73,11 @@ export default function ChatMessages({ onEmotionChange }: ChatMessagesProps) {
                 const botMsg: ChatMessage = {
                     id: messages.length + 2,
                     sender: "bot",
-                    text: data.text,
-                    emotion: data.emotion,
+                    text: data.response,
+                    expression: data.expression,
                 };
 
-                onEmotionChange(data.emotion);
+                onEmotionChange(data.expression);
                 setMessages(prev => [...prev, botMsg]);
 
             } else {
@@ -98,8 +105,8 @@ export default function ChatMessages({ onEmotionChange }: ChatMessagesProps) {
     }
 
     return (
-        <div className="flex flex-col gap-4 p-4 h-1/2">
-            <div className="flex flex-col gap-4 p-4 overflow-y-auto">
+        <div className="flex flex-col gap-4 p-4 h-full">
+            <div className="flex-1 flex flex-col gap-4 p-4 overflow-y-auto">
                 {messages.map((msg) => (
                     <div
                         key={msg.id}
@@ -111,10 +118,11 @@ export default function ChatMessages({ onEmotionChange }: ChatMessagesProps) {
                         {msg.text}
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
             {/* ChatInput  */}
-            <div className="justify-center items-center">
-                <div className="flex items-center gap-2 p-4 border-t">
+            <div className="flex flex-col justify-center items-center gap-2">
+                <div className="flex items-center gap-2 p-4 border-t w-full">
                     <input
                         className="flex-1 border rounded-lg p-2 text-sm"
                         placeholder="Enter to send..."

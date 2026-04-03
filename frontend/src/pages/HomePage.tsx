@@ -13,13 +13,13 @@ export default function HomePage() {
   const ActiveComponent = tabs[activeTab].component;
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="flex flex-col">
       <div className="flex border-b">
         {tabs.map((tab, index) => (
           <button
             key={index}
             onClick={() => setActiveTab(index)}
-            className={`px-4 py-2 ${activeTab === index ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
+            className={`px-4 py-2 ${activeTab === index ? 'border-b-2 border-violet-500 text-violet-500' : 'text-gray-500'}`}
           >
             {tab.name}
           </button>

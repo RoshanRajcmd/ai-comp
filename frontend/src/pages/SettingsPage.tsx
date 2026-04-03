@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
 
 type Settings = {
-    mode: "neuro" | "evil_neuro";
-    chaos: number;
+    persona?: string;
+    text_model?: string;
+    vision_model?: string;
+    voice_model?: string;
+    chat_memory?: boolean;
+    camera_rotation?: number;
+    extra_preset_prompt?: string;
     web_access: boolean;
+    ollama_config?: any;
+    // Legacy fields (kept for compatibility)
+    mode?: "neuro" | "evil_neuro";
+    chaos?: number;
 };
 
 const API = "http://localhost:5000/api/settings";
@@ -34,24 +43,25 @@ export default function SettingsPage() {
 
             {/* Personality Mode */}
             <select
-                value={settings.mode}
+                value={settings.mode || settings.persona || ""}
                 onChange={e =>
-                    update({ ...settings, mode: e.target.value as any })
+                    update({ ...settings, mode: e.target.value as any, persona: e.target.value })
                 }
             >
+                <option value="">Select Mode</option>
                 <option value="neuro">Neuro</option>
                 <option value="evil_neuro">Evil Neuro</option>
             </select>
 
             {/* Chaos Slider */}
             <div>
-                <label>Chaos: {settings.chaos.toFixed(2)}</label>
+                <label>Chaos: {(settings.chaos ?? 0).toFixed(2)}</label>
                 <input
                     type="range"
                     min={0}
                     max={1}
                     step={0.05}
-                    value={settings.chaos}
+                    value={settings.chaos ?? 0}
                     onChange={e =>
                         update({ ...settings, chaos: parseFloat(e.target.value) })
                     }

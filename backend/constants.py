@@ -3,6 +3,7 @@ IMAGE_DIR = "./images/"
 OLLAMA_API_URL = "http://ollama:11434"
 CONFIG_PATH = "config.json"
 MEMORY_PATH = "memory.json"
+CONVERSATIONS_DIR = "./conversations"
 INIT_EXPRESSION = "neutral"
 MAX_MESSAGE_HISTORY = 10
 

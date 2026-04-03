@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { AVT_EXPRESSIONS } from '../Constants';
 import { Emotion } from '../types/Types';
+import { IoVolumeHigh, IoVolumeMute } from "react-icons/io5";
 
 declare global {
     interface Window {
@@ -108,18 +109,23 @@ export default function AvatarPane({ emotion }: AvatarPaneProps) {
     function get_settings() {
         //TODO: Fetch from backend
         return {
-            mode: "neuro",
-            chaos: 0.5,
+            model: "neuro",
+            persona: "Neuro",
+            isTTSOn: true,
         }
     }
 
     return (
-        <div className="flex-1 rounded-2xl shadow-lg flex flex-col w-1/2 mx-4 my-4 bg-[#EAEAF3] border-r border-gray-200 p-4">
+        <div className="rounded-2xl shadow-lg flex flex-col border-r border-gray-200 bg-gradient-to-br from-violet-100 to-violet-400 p-4">
             <h2 className="text-xl font-semibold pb-2">Ai Companion bot</h2>
-            <p className="text-xs text-gray-500 mb-1">Model: {get_settings().mode} Persona: {get_settings().chaos}</p>
+            <p className="text-xs text-gray-500 mb-1">LLM Model: {get_settings().model} Persona: {get_settings().persona}</p>
 
             <div className="flex-1 my-6 p-6 bg-white rounded-lg shadow-sm text-sm text-gray-700 text-center">
                 <div className='w-full flex items-center justify-center'>
+                    <div>
+                        {get_settings().isTTSOn ? <IoVolumeHigh /> : <IoVolumeMute />}
+                    </div>
+                    {/* TODO image will be either looped or will stay static based on the ModelState we get from backend */}
                     <img
                         src={AVT_EXPRESSIONS[emotion]}
                         alt={emotion}
@@ -129,13 +135,6 @@ export default function AvatarPane({ emotion }: AvatarPaneProps) {
                 <div className="text-[10px] text-gray-400 mt-1">
                     {action}
                 </div>
-            </div>
-            <div className="flex flex-col justify-center items-center">
-                <button className="w-fit bg-white rounded-full p-6 shadow-sm text-sm hover:bg-slate-100" onClick={handleMicPress}>
-                    {action === "Speaking" ? <StopIcon /> : <MicrophoneIcon />}
-                </button>
-                {/* there are 3 state for action - listening, speaking, null (shows Press to Speak) */}
-                <span className="text-sm font-light text-gray-500 py-6">{action === "" ? "Press to Speak" : action}</span>
             </div>
         </div >
     );

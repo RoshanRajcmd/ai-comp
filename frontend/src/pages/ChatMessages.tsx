@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChatMessage, Emotion } from "../types/Types";
 import { MdEditDocument } from "react-icons/md";
+import { IoMdCheckmark, IoMdClose } from "react-icons/io";
+import { RiPencilFill } from "react-icons/ri";
 
 const SendIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
@@ -32,6 +34,7 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
     const [isEditing, setIsEditing] = useState(false);
     const [editedTitle, setEditedTitle] = useState(conversationTitle || "");
     const [creatingNew, setCreatingNew] = useState(false);
+    const [copiedMessageId, setCopiedMessageId] = useState<number | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Auto-scroll to bottom when new messages arrive
@@ -169,15 +172,12 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
         }
     }
 
-    const copyChat = () => {
-        const chatText = messages
-            .map(msg => `${msg.sender === 'user' ? 'You' : 'Bot'}: ${msg.text}`)
-            .join('\n');
-
-        navigator.clipboard.writeText(chatText).then(() => {
-            alert('Chat copied to clipboard!');
+    const copyMessage = (messageId: number, text: string) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setCopiedMessageId(messageId);
+            setTimeout(() => setCopiedMessageId(null), 2000); // Reset after 2 seconds
         }).catch(err => {
-            console.error('Failed to copy chat:', err);
+            console.error('Failed to copy message:', err);
         });
     };
 
@@ -208,7 +208,7 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
             <div className="flex items-center justify-between mb-4 pb-4 border-b">
                 <div className="flex-1">
                     {isEditing ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 pr-5">
                             <input
                                 type="text"
                                 value={editedTitle}
@@ -222,15 +222,17 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
                             />
                             <button
                                 onClick={handleSaveTitle}
-                                className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-400"
+                                className="p-1 text-green-500 hover:text-green-600"
+                                title="Save"
                             >
-                                Save
+                                <IoMdCheckmark size={20} />
                             </button>
                             <button
                                 onClick={handleCancelEdit}
-                                className="px-3 py-1 bg-gray-400 text-white rounded-lg text-sm hover:bg-gray-500"
+                                className="p-1 text-gray-500 hover:text-gray-600"
+                                title="Cancel"
                             >
-                                Cancel
+                                <IoMdClose size={20} />
                             </button>
                         </div>
                     ) : (
@@ -238,28 +240,23 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
                             <h2 className="text-lg font-semibold text-gray-700">
                                 {conversationTitle || "Untitled"}
                             </h2>
-                            {conversationTitle && (
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="p-1 text-gray-500 hover:text-gray-700"
-                                    title="Edit conversation title"
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L21 6.5z"></path>
-                                    </svg>
-                                </button>
-                            )}
+                            <button
+                                onClick={() => setIsEditing(true)}
+                                className="p-1 text-gray-500 hover:text-gray-700"
+                                title="Edit conversation title"
+                            >
+                                <RiPencilFill size={16} />
+                            </button>
                         </div>
                     )}
                 </div>
                 <button
                     onClick={handleCreateNewChat}
                     disabled={creatingNew}
-                    className="flex items-center gap-2 p-2 bg-blue-500 text-white hover:bg-blue-400 rounded-lg text-sm shadow transition-all disabled:bg-gray-400"
+                    className="flex items-center gap-2 p-2 bg-blue-500 text-white hover:bg-blue-400 rounded-full text-sm shadow transition-all disabled:bg-gray-400"
                     title="Create new chat"
                 >
                     <MdEditDocument size={20} />
-                    {creatingNew ? 'Creating...' : 'New'}
                 </button>
             </div>
 
@@ -277,12 +274,31 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
                 {messages.map((msg) => (
                     <div
                         key={msg.id}
-                        className={`max-w-xs p-3 rounded-lg text-sm ${msg.sender === "user"
-                            ? "bg-blue-100 self-end"
-                            : "bg-gray-100 self-start"
-                            }`}
+                        className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                     >
-                        {msg.text}
+                        <div className="flex flex-col gap-1">
+                            <div
+                                className={`max-w-xs p-3 rounded-lg text-sm ${msg.sender === "user"
+                                    ? "bg-blue-100"
+                                    : "bg-gray-100"
+                                    }`}
+                            >
+                                {msg.text}
+                            </div>
+                            <button
+                                onClick={() => copyMessage(msg.id, msg.text)}
+                                className={`text-xs px-2 py-1 rounded flex items-center gap-1 transition-all ${copiedMessageId === msg.id
+                                    ? "bg-green-200 text-green-700"
+                                    : msg.sender === "user"
+                                        ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                        : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                    } ${msg.sender === "user" ? "self-end" : "self-start"}`}
+                                title="Copy message"
+                            >
+                                <CopyIcon />
+                                {copiedMessageId === msg.id ? "Copied!" : "Copy"}
+                            </button>
+                        </div>
                     </div>
                 ))}
                 <div ref={messagesEndRef} />
@@ -291,7 +307,7 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
             <div className="flex flex-col justify-center items-center gap-2">
                 <div className="flex items-center gap-2 p-4 border-t w-full">
                     <input
-                        className="flex-1 border rounded-lg p-2 text-sm"
+                        className="flex-1 border rounded-full p-2 text-sm"
                         placeholder="Enter to send..."
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
@@ -299,7 +315,7 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
                         disabled={loading}
                     />
                     <button
-                        className="flex gap-1 p-2 bg-blue-500 text-white hover:bg-blue-400 rounded-lg text-sm shadow items-center disabled:bg-gray-400"
+                        className="flex gap-1 p-2 bg-blue-500 text-white hover:bg-blue-400 rounded-full text-sm shadow items-center disabled:bg-gray-400"
                         onClick={onSend}
                         disabled={loading}
                     >
@@ -307,13 +323,6 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
                         {loading ? "Sending..." : "Send"}
                     </button>
                 </div>
-                <button
-                    className="flex gap-1 p-2 bg-blue-500 text-white hover:bg-blue-400 rounded-lg text-sm shadow items-center"
-                    onClick={copyChat}
-                >
-                    <CopyIcon />
-                    Copy Chat
-                </button>
             </div>
         </div>
     );

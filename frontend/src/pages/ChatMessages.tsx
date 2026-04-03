@@ -3,20 +3,13 @@ import { ChatMessage, Emotion } from "../types/Types";
 import { MdEditDocument } from "react-icons/md";
 import { IoMdCheckmark, IoMdClose } from "react-icons/io";
 import { RiPencilFill } from "react-icons/ri";
+import { MdFileCopy } from "react-icons/md";
+import { IoSend } from "react-icons/io5";
 
-const SendIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
-        <line x1="22" y1="2" x2="11" y2="13"></line>
-        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-    </svg>
-);
 
-const CopyIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
-        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-    </svg>
-);
+
+
+
 
 interface ChatMessagesProps {
     readonly onEmotionChange: (emotion: Emotion) => void;
@@ -76,8 +69,14 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
             const data = await response.json();
 
             if (data.messages) {
+                // Skip the first message if it's from the bot (personality prompt)
+                let messagesToProcess = data.messages;
+                if (messagesToProcess.length > 0 && messagesToProcess[0].role !== 'user') {
+                    messagesToProcess = messagesToProcess.slice(1);
+                }
+
                 // Convert backend message format to ChatMessage format
-                const formattedMessages: ChatMessage[] = data.messages.map((msg: { role: string; content: string }, idx: number) => ({
+                const formattedMessages: ChatMessage[] = messagesToProcess.map((msg: { role: string; content: string }, idx: number) => ({
                     id: idx,
                     sender: msg.role === 'user' ? 'user' : 'bot',
                     text: msg.content
@@ -205,7 +204,7 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
     return (
         <div className="flex flex-col p-4 h-full">
             {/* Header */}
-            <div className="flex items-center justify-between mb-4 pb-4 border-b">
+            <div className="flex items-center justify-between mb-4 pb-4 border-b flex-shrink-0">
                 <div className="flex-1">
                     {isEditing ? (
                         <div className="flex items-center gap-2 pr-5">
@@ -265,7 +264,7 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
                     Loading conversation...
                 </div>
             )}
-            <div className="flex-1 flex flex-col gap-4 p-4 overflow-y-auto">
+            <div className="max-h-96 overflow-y-auto flex flex-col gap-4 p-4 border rounded-lg bg-white">
                 {messages.length === 0 && !loadingHistory && (
                     <div className="flex items-center justify-center h-full text-gray-400">
                         {conversationId ? 'No messages in this conversation' : 'Start typing to begin'}
@@ -295,7 +294,7 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
                                     } ${msg.sender === "user" ? "self-end" : "self-start"}`}
                                 title="Copy message"
                             >
-                                <CopyIcon />
+                                <MdFileCopy />
                                 {copiedMessageId === msg.id ? "Copied!" : "Copy"}
                             </button>
                         </div>
@@ -304,7 +303,7 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
                 <div ref={messagesEndRef} />
             </div>
             {/* ChatInput  */}
-            <div className="flex flex-col justify-center items-center gap-2">
+            <div className="flex flex-col justify-center items-center gap-2 flex-shrink-0">
                 <div className="flex items-center gap-2 p-4 border-t w-full">
                     <input
                         className="flex-1 border rounded-full p-2 text-sm"
@@ -319,7 +318,7 @@ export default function ChatMessages({ onEmotionChange, conversationId, conversa
                         onClick={onSend}
                         disabled={loading}
                     >
-                        <SendIcon />
+                        <IoSend />
                         {loading ? "Sending..." : "Send"}
                     </button>
                 </div>

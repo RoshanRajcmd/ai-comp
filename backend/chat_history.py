@@ -87,13 +87,15 @@ class ChatHistory:
                         conv_id = filename.replace('.json', '')
                         timestamp = data.get('timestamp', '')
                         messages = data.get('messages', [])
+                        # Use title directly from JSON, fallback to first user message if not present
+                        title = data.get('title', 'Untitled')
                         
-                        # Get title from first user message or generate from timestamp
-                        title = "Untitled"
-                        for msg in messages:
-                            if msg.get('role') == 'user':
-                                title = msg.get('content', '')[:50]
-                                break
+                        if title == 'Untitled':
+                            # Fallback: extract from first user message if title is not set
+                            for msg in messages:
+                                if msg.get('role') == 'user':
+                                    title = msg.get('content', '')[:50]
+                                    break
                         
                         conversations.append({
                             'id': conv_id,
@@ -153,6 +155,28 @@ class ChatHistory:
         except Exception as e:
             print(f"Error saving conversation {conv_id}: {e}")
             return False
+
+    @staticmethod
+    def update_conversation_title(conv_id: str, title: str):
+        """
+        Update the title of an existing conversation.
+        """
+        filepath = os.path.join(CONVERSATIONS_DIR, f"{conv_id}.json")
+        if os.path.exists(filepath):
+            try:
+                with open(filepath, 'r') as f:
+                    data = json.load(f)
+                
+                # Update title, preserve timestamp
+                data['title'] = title
+                
+                with open(filepath, 'w') as f:
+                    json.dump(data, f, indent=4)
+                return True
+            except Exception as e:
+                print(f"Error updating conversation {conv_id}: {e}")
+                return False
+        return False
 
 # Global singleton
 _chat_history = None

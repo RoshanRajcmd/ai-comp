@@ -67,9 +67,31 @@ export default function ChatPage() {
     };
 
     const handleSaveTitle = async (newTitle: string) => {
-        // Update title in backend - implement if your backend supports this
-        setConversationTitle(newTitle);
-        // You can add an API call here to persist the title change
+        if (!selectedConversationId) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/conversations/${selectedConversationId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title: newTitle })
+            });
+
+            if (response.ok) {
+                setConversationTitle(newTitle);
+                // Update conversations list with new title
+                setConversations(prev =>
+                    prev.map(c =>
+                        c.id === selectedConversationId ? { ...c, title: newTitle } : c
+                    )
+                );
+            } else {
+                console.error('Failed to update conversation title');
+            }
+        } catch (err) {
+            console.error('Failed to save title:', err);
+        }
     };
 
     return (

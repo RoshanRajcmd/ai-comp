@@ -146,6 +146,31 @@ def create_conversation():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.put("/api/conversations/<conv_id>")
+def update_conversation(conv_id: str):
+    """
+    Update a conversation's title
+    """
+    try:
+        data = request.json or {}
+        title = data.get("title")
+        
+        if not title:
+            return jsonify({"error": "Title is required"}), 400
+        
+        success = ChatHistory.update_conversation_title(conv_id, title)
+        
+        if not success:
+            return jsonify({"error": "Conversation not found"}), 404
+        
+        return jsonify({
+            "id": conv_id,
+            "title": title,
+            "status": "updated"
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # --------------------------------------------------
 # Fetch Chat History
 # --------------------------------------------------

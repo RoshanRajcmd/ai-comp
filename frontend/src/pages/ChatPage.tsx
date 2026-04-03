@@ -5,11 +5,27 @@ import { Emotion } from "../types/Types";
 import ChatHistory from "./ChatHistory";
 import { History } from "../types/Types";
 
+const HamburgerIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+);
+
+const CloseIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+);
+
 export default function ChatPage() {
     const [emotion, setEmotion] = useState<Emotion>("neutral");
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
     const [conversationTitle, setConversationTitle] = useState<string>("");
     const [conversations, setConversations] = useState<History[]>([]);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
     const handleCreateNewChat = async () => {
         try {
@@ -46,6 +62,8 @@ export default function ChatPage() {
                 return [...prev, conversation];
             });
         }
+        // Close mobile history panel when a conversation is selected
+        setIsHistoryOpen(false);
     };
 
     const handleSaveTitle = async (newTitle: string) => {
@@ -56,13 +74,20 @@ export default function ChatPage() {
 
     return (
         <div className="flex h-screen">
-            <div className="justify-center">
-                <AvatarPane emotion={emotion} />
-                <ChatHistory onSelectConversation={handleSelectConversation} />
-            </div>
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col bg-[#EAEAF3] relative">
+                {/* Mobile Hamburger Button */}
+                <div className="lg:hidden flex items-center p-2 bg-[#EAEAF3] border-b">
+                    <button
+                        onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+                        className="p-2 text-gray-700 hover:text-gray-900"
+                        title="Toggle conversation history"
+                    >
+                        {isHistoryOpen ? <CloseIcon /> : <HamburgerIcon />}
+                    </button>
+                </div>
 
-            {/* Sidebar  */}
-            <div className="flex-1 flex flex-col bg-[#EAEAF3]">
+                <AvatarPane emotion={emotion} />
                 <ChatMessages
                     conversationId={selectedConversationId}
                     conversationTitle={conversationTitle}
@@ -73,6 +98,22 @@ export default function ChatPage() {
                     }}
                 />
             </div>
-        </div >
+
+            {/* Mobile Overlay - Chat History Modal */}
+            {isHistoryOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 lg:hidden z-40"
+                    onClick={() => setIsHistoryOpen(false)}
+                />
+            )}
+
+            {/* Chat History Sidebar - Desktop fixed, Mobile toggleable */}
+            <div
+                className={`flex fixed lg:static right-0 top-0 h-screen w-80 lg:w-auto bg-[#e4e4f8] transform transition-transform duration-300 z-50 lg:z-0 ${isHistoryOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
+                    }`}
+            >
+                <ChatHistory onSelectConversation={handleSelectConversation} />
+            </div>
+        </div>
     );
 }

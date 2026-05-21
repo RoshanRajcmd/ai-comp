@@ -1,6 +1,8 @@
+import os
+
 # --- APP CONFIGURATION ---
 IMAGE_DIR = "./images/"
-OLLAMA_API_URL = "http://ollama:11434"
+OLLAMA_API_URL = os.environ.get("OLLAMA_API_URL", "http://host.docker.internal:11434")
 CONFIG_PATH = "config.json"
 MEMORY_PATH = "memory.json"
 CONVERSATIONS_DIR = "./conversations"

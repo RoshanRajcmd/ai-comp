@@ -1,4 +1,4 @@
-import requests
+import requests, os
 import json
 import datetime
 from typing import Dict, Any
@@ -6,7 +6,6 @@ from typing import Dict, Any
 from constants import OLLAMA_API_URL, DEFAULT_CONFIG
 from utils.prompt_builder import build_init_system_prompt
 from chat_history import get_chat_history
-
 
 class OllamaClient:
     def __init__(

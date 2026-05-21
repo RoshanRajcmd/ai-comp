@@ -10,7 +10,7 @@ INIT_EXPRESSION = "neutral"
 MAX_MESSAGE_HISTORY = 10
 
 DEFAULT_CONFIG = {
-    "persona": "neuro",
+    "persona": "ollie",
     "text_model": "gemma3:1b",
     "vision_model": "moondream",
     "voice_model": "piper/en_GB-semaine-medium.onnx",

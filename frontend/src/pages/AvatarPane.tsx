@@ -109,8 +109,8 @@ export default function AvatarPane({ emotion }: AvatarPaneProps) {
     function get_settings() {
         //TODO: Fetch from backend
         return {
-            model: "neuro",
-            persona: "Neuro",
+            model: "ollie",
+            persona: "ollie",
             isTTSOn: true,
         }
     }

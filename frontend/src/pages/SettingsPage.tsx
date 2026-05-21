@@ -11,7 +11,7 @@ type Settings = {
     web_access: boolean;
     ollama_config?: any;
     // Legacy fields (kept for compatibility)
-    mode?: "neuro" | "evil_neuro";
+    mode?: "ollie" | "oliver";
     chaos?: number;
 };
 
@@ -49,8 +49,8 @@ export default function SettingsPage() {
                 }
             >
                 <option value="">Select Mode</option>
-                <option value="neuro">Neuro</option>
-                <option value="evil_neuro">Evil Neuro</option>
+                <option value="ollie">Ollie</option>
+                <option value="oliver">Oliver</option>
             </select>
 
             {/* Chaos Slider */}

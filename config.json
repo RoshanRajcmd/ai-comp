@@ -1,0 +1,14 @@
+{
+  "personas": {
+    "ollie": {
+      "name": "Ollie",
+      "pronouns": "she/her",
+      "personality": "Cute, playful, curious, slightly naive."
+    },
+    "oliver": {
+      "name": "Oliver",
+      "Pronouns": "he/him",
+      "Personality": "Sarcastic, mischievous, Gently teaseful."
+    }
+  }
+}

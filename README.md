@@ -1,191 +1,486 @@
-# Lumi
+# Ollie - AI Companion on Raspberry Pi
 
-An **AI-powered personalized assistant** that helps users manage tasks, provides **personalized recommendations**, and supports **preset personas** using **open-sourced and custom MCP servers**.
-Lumi supports both **text and voice interactions**, combining modern web technologies with AI inference pipelines.
+Local AI assistant with facial expressions, voice interation, and webUI. Runs entirely offline using Ollama
+---
+
+# Local Offline Coding Agent Setup
+
+This guide sets up a **fully local, UI-free coding agent** on **macOS Apple Silicon (M3)** using:
+
+* **llama.cpp** (native, Metal-accelerated inference)
+* **GGUF local models** (easy to swap, future-proof)
+* **aider** (CLI coding agent that edits your repo safely)
+
+No VS Code extensions. No SaaS. No background daemons.
 
 ---
 
-## ⚙️ Source Code
+## 0. Prerequisites
 
-> Multi-component architecture
+* macOS (Apple Silicon M1/M2/M3)
+* 16 GB RAM (works well for 6–8B models)
+* Homebrew installed
+* Git installed
+* Python 3.9+
 
-* **React Frontend** – Web UI with text & voice interaction
-* **Flask Backend** – API layer and AI orchestration
-* **Ollama (LLM Runtime)** – Local model inference
-* **Dockerized Services** – Unified orchestration via Docker Compose
+Check:
+
+```bash
+brew --version
+git --version
+python3 --version
+```
 
 ---
 
-## 📚 Tech Stack and Packages
+## 1. Install llama.cpp (Native + Metal)
 
-### Frontend
+Install via Homebrew:
 
-* React (Create React App)
-* TypeScript
-* React Icons
-* PropTypes
-* Web Speech API (SpeechRecognition)
+```bash
+brew install llama.cpp
+```
 
-### Backend
+Verify:
 
-* Flask (Python)
+```bash
+llama-cli --help
+llama-server --help
+```
 
-### AI / Voice
+> `llama-server` provides an OpenAI-compatible HTTP API.
 
-* Ollama
-* Llama-3.2-8B LLM
-* Piper TTS Voices
+---
 
-### DevOps
+## 2. Create a Models Directory
+
+Create a single place for all models:
+
+```bash
+mkdir -p ~/Documents/VSCodeWS/llm/models
+```
+
+Recommended structure:
+
+```text
+~/Documents/VSCodeWS/llm/models/
+├── deepseek-coder-6.7b-q4_K_M.gguf
+├── qwen2.5-coder-7b-q4_K_M.gguf
+├── llama-3.1-8b-q4_K_M.gguf
+```
+
+---
+
+## 3. Download Recommended Coding Models (GGUF)
+
+### ⭐ Recommended (Laptop-friendly)
+
+* **DeepSeek-Coder 6.7B – q4_K_M** (best overall)
+* **Qwen2.5-Coder 7B – q4_K_M** (very strong, modern)
+
+Download from Hugging Face (example):
+deepseek-coder-6.7b-q4_K_M.gguf
+
+(Repeat for other models you want.)
+
+---
+
+## 4. Run llama.cpp Server (Metal Optimized)
+
+### Start Server
+
+```bash
+llama-server \
+  -m ~/Documents/VSCodeWS/llm/models/deepseek-coder-6.7b-q4_K_M.gguf \
+  -c 4096 \
+  -t 6 \
+  --port 11434
+```
+
+Explanation:
+
+* `-m` → model path
+* `-c 4096` → context window
+* `-t 6` → CPU threads (prevents thermal throttling)
+* `--metal` → Apple GPU acceleration
+* `--port 11434` → API endpoint
+
+### Test Server
+
+```bash
+curl http://localhost:11434/v1/models
+```
+
+---
+
+## 5. Switching Models
+
+Stop server (`Ctrl+C`), then restart with a different model:
+
+```bash
+llama-server \
+  -m ~/Documents/VSCodeWS/llm/models/qwen2.5-coder-7b-instruct-q4_k_m.gguf \
+  -c 4096 \
+  -t 6 \
+  --port 11434
+```
+
+No reinstallation required.
+
+---
+
+## 6. Remove a Model
+
+```bash
+rm ~/Documents/VSCodeWS/llm/models/old-model-name.gguf
+```
+
+That’s it — no registry cleanup needed.
+
+---
+
+## 7. Install aider (CLI Coding Agent)
+
+Install via pip:
+
+```bash
+python -m pip install aider-install
+aider-install
+```
+
+Verify:
+
+```bash
+aider --version
+```
+
+Official site: [https://aider.chat](https://aider.chat)
+
+---
+
+## 8. Initialize a Project for aider
+
+Inside your git repository:
+
+```bash
+git init   # if not already a repo
+aider
+```
+
+Or explicitly point aider at your local model API:
+
+```bash
+aider \
+  --model openai/qwen2.5-coder-7b \
+  --openai-api-base http://localhost:11434 \
+  --openai-api-key none \
+  --map-tokens 0 \
+  --edit-format diff
+```
+
+NOTE:
+If you need to limit the context window on aider side as well then append the below
+```bash
+--max-chat-history-tokens 3000 \
+```
+
+If you are getting the model warning error to be removed https://aider.chat/docs/llms/warnings.html append the below
+```bash
+  --no-show-model-warnings
+```
+
+---
+
+## 9. Basic aider Commands
+
+Inside aider prompt:
+
+```text
+/add file.py        # allow agent to edit file
+/drop file.py       # remove file from context
+/ls                 # list tracked files
+/diff               # show proposed changes
+/commit             # commit changes
+/undo               # revert last change
+```
+
+Example task:
+
+```text
+Refactor this module to use async/await and add unit tests.
+```
+
+---
+
+## 10. Safe Workflow (Recommended)
+
+```bash
+git status
+aider
+git diff
+git commit -m "AI: refactor auth logic"
+```
+
+Aider will never silently overwrite files.
+
+---
+
+## 11. Performance Tuning (macOS M3)
+
+Recommended limits:
+
+* Context: 2048–4096
+* Threads: 4–6
+* Quantization: q4_K_M
+* One model running at a time
+
+Avoid:
 
 * Docker
-* Docker Compose
+* q8 models
+* Threads > CPU performance cores
 
 ---
 
-### 📦 NPM Packages Installed
+## 12. Optional: One-Command Launch Script
+
+### macOS (Apple Silicon)
+
+Create `run-llm.sh`:
 
 ```bash
-npm install react-icons
-npm install prop-types
-npm install --save-dev typescript@latest @types/react@latest @types/react-dom@latest
-npm install typescript@4.9.5 --save-dev
-npm install --save @types/dom-speech-recognition
+#!/bin/bash
+llama-server \
+  -m ~/Documents/VSCodeWS/llm/models/deepseek-coder-6.7b-q4_K_M.gguf \
+  -c 4096 \
+  -t 6 \
+  --metal
+```
+
+```bash
+chmod +x run-llm.sh
+./run-llm.sh
 ```
 
 ---
 
-## 🎛️ Features
+## 13. Linux Mint Setup (CPU or GPU)
 
-1. AI-powered personalized assistant
-2. Task management and intelligent recommendations
-3. Preset and customizable personas
-4. Text-based interaction
-5. Voice input using Web Speech API
-6. Voice output using Piper TTS voices
-7. Local LLM inference using Ollama
-8. Modular architecture using MCP servers
-9. Fully Dockerized development environment
-
----
-
-## 🧑‍💻 Developer Setup
-
-### 🔊 Voice Recognition (Web Speech API)
-
-Uses the browser’s native Speech Recognition API.
-
-📘 References:
-
-* MDN Documentation:
-  [https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition)
-* Type Definitions:
-  [https://www.npmjs.com/package/@types/dom-speech-recognition](https://www.npmjs.com/package/@types/dom-speech-recognition)
-
----
-
-### 🗣️ Text-to-Speech (Piper Voices)
-
-Latest Piper voice models can be downloaded from:
-
-[https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/lessac/medium](https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/lessac/medium)
-
----
-
-### 🧠 LLM Setup (Ollama)
-
-#### Download the Model (Run Once on Host Machine)
+### 13.1 Install llama.cpp (Linux Mint)
 
 ```bash
-docker run -it --rm -v ./ollama_data:/root/.ollama ollama/ollama pull Llama-3.2-8B
+sudo apt update
+sudo apt install -y build-essential cmake python3 python3-pip git
+
+git clone https://github.com/ggerganov/llama.cpp.git
+cd llama.cpp
+make
+sudo cp llama-server /usr/local/bin/
 ```
 
-This downloads the **Llama-3.2-8B** model into a persistent Docker volume.
-
----
-
-### 🐳 Running with Docker (Recommended)
-
-#### Run from Project Root
+Verify:
 
 ```bash
-docker compose up --build
-```
-
-This will start:
-
-* React Frontend
-* Flask Backend
-* Ollama LLM service
-
----
-
-### 🧩 Running Components Individually
-
-```bash
-cd <component_directory>
-docker build frontend .
-docker run -d -p 3000:3000 frontend
+llama-server --help
 ```
 
 ---
 
-### 🌐 Service URLs
+### 13.2 Linux Mint (CPU-only) – Run Server
 
-| Service        | URL                                            |
-| -------------- | ---------------------------------------------- |
-| React Frontend | [http://localhost:3000](http://localhost:3000) |
-| Flask Backend  | [http://localhost:5000](http://localhost:5000) |
-| Ollama API     | [http://ollama:11434](http://ollama:11434)     |
+```bash
+llama-server \
+  -m ~/Documents/VSCodeWS/llm/models/deepseek-coder-6.7b-q4_K_M.gguf \
+  -c 4096 \
+  -t $(nproc)
+```
 
----
+Recommended:
 
-## ⚛️ React Application Scripts
-
-This project was bootstrapped using **Create React App**.
-
-### `npm start`
-
-Runs the app in development mode.
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-* Auto reload on file changes
-* Lint errors shown in console
+* Use `q4_K_M` or `q4_0`
+* Threads = physical cores, not logical
 
 ---
 
-### `npm test`
+### 13.3 Linux Mint (NVIDIA GPU – Optional)
 
-Runs the test runner in interactive watch mode.
+Install CUDA + drivers, then build with CUDA:
 
----
+```bash
+make clean
+make LLAMA_CUBLAS=1
+sudo cp llama-server /usr/local/bin/
+```
 
-### `npm run build`
+Run:
 
-Builds the app for production into the `build` folder.
-
-* Optimized production build
-* Minified output
-* Hashed filenames
-* Ready for deployment
-
----
-
-### `npm run eject`
-
-⚠️ **One-way operation**
-
-* Exposes all build configs (Webpack, Babel, ESLint, etc.)
-* Cannot be undone
-* Use only if deep customization is required
+```bash
+llama-server \
+  -m ~/Documents/VSCodeWS/llm/models/deepseek-coder-6.7b-q4_K_M.gguf \
+  -c 4096
+```
 
 ---
 
-## 📖 Learn More
+### 13.4 Install aider (Linux Mint)
 
-* Create React App Docs:
-  [https://facebook.github.io/create-react-app/docs/getting-started](https://facebook.github.io/create-react-app/docs/getting-started)
-* React Documentation:
-  [https://reactjs.org/](https://reactjs.org/)
+```bash
+python3 -m pip install --upgrade aider-chat
+aider-chat
+```
+
+Run:
+
+```bash
+aider \
+  --model openai/qwen2.5-coder-7b \
+  --openai-api-base http://localhost:11434 \
+  --openai-api-key none
+```
+
+---
+
+## 14. Full Removal / Clean Uninstall
+
+### 14.1 Stop Running Services
+
+```bash
+pkill llama-server
+```
+
+---
+
+### 14.2 Remove Models
+
+```bash
+rm -rf ~/llm
+```
+
+---
+
+### 14.3 Remove llama.cpp
+
+#### macOS (Homebrew)
+
+```bash
+brew uninstall llama.cpp
+```
+
+#### Linux Mint (source build)
+
+```bash
+sudo rm /usr/local/bin/llama-server
+rm -rf ~/llama.cpp
+```
+
+---
+
+### 14.4 Remove aider
+
+```bash
+python3 -m pip uninstall aider-install
+python3 -m pip uninstall aider-chat
+```
+
+---
+
+### 14.5 Optional: Python Cleanup
+
+```bash
+pip cache purge
+```
+
+---
+
+### 14.6 Verify Clean State
+
+```bash
+which llama-server || echo "llama.cpp removed"
+which aider || echo "aider removed"
+```
+
+---
+
+## 15. Final Notes
+
+You now have a setup that can be:
+
+* Installed
+* Removed
+* Reinstalled
+* Migrated across machines
+
+With **zero vendor lock-in** and full control over models and agents.
+
+Create `run-llm.sh`:
+
+```bash
+#!/bin/bash
+llama-server \
+  -m ~/Documents/VSCodeWS/llm/models/deepseek-coder-6.7b-q4_K_M.gguf \
+  -c 4096 \
+  -t 6 \
+  --metal
+```
+
+```bash
+chmod +x run-llm.sh
+./run-llm.sh
+```
+
+---
+
+## 13. What You Now Have
+
+* Fully offline coding agent
+* Fast model switching
+* Git-safe edits
+* Zero UI / zero SaaS
+* Future-proof for new models
+
+---
+
+## Next Steps (Optional)
+
+* Add multiple agents
+* Write your own minimal agent loop
+* Add test-running tools
+* Automate benchmarks per model
+
+You now own the stack.
+
+---
+
+Here is a clean, professional summary tailored directly for your `README.md` that explains exactly why you chose this modern stack for your local AI orchestrator:
+
+---
+
+### Why NiceGUI + Python stack?
+
+The architecture of this project is explicitly designed to bypass the security risks and heavy build pipelines of traditional frontend ecosystems like npm and Node.js. By utilizing **NiceGUI**, the entire system is built completely within a unified Python environment. NiceGUI securely wraps FastAPI, Vue, and Tailwind CSS under the hood, delivering a modern, responsive, and highly interactive user interface via standard Python Pip installations. This completely eliminates a separate `node_modules` dependency tree, removing the system from the expanding threat surface of frontend supply chain vulnerabilities and malicious package injections.
+
+Furthermore, this stack provides unparalleled synergy for managing local AI models and containerized infrastructure. Because NiceGUI runs directly on a FastAPI asynchronous engine, it natively handles the high-frequency WebSockets required to stream tokens live from local **Ollama** models without interface lag. Concurrently, because the entire UI logic resides in native Python, the frontend event handlers can interact directly with the local file system, **Model Context Protocol (MCP)** SDKs, and the **Docker** daemon without needing intermediate REST API translation layers. This results in a highly secure, lightweight, and performant orchestrator engineered specifically for heavy, local AI operations.
+
+---
+
+## Todo
+
+1. Move out from js based frontend as there is more wore attacks happens to npm packages recently and also this will reduce the size of the project with no node_modules dependency.
+2. Optimize the project size and also container size of the frontend, backend to fit in small raspberry pi
+3. Optimize code logic for performance
+4. Asking the text model to also give the expression is inconsistent we need a better way to find the expression for the responses given from the text model.
+5. Make external API provider compatible with API key feature.
+6. Make the ui friendly for all type of screens
+7. Maybe instead of storing the chat in json we can migrate to use sqlite DB persistence
+8. Robot actuation control UI and code logic - REF https://github.com/dorianborian/sesame-companion-app
+
+---
+
+## References
+- https://github.com/brenpoly/be-more-agent
+- https://github.com/Guitarman9119/Raspberry-Pi-Pico-/tree/main/SSD1306%20OLED%20Display
+- https://github.com/dorianborian/sesame-companion-app
 
 
+if you are building the docker image in you mac apple silicon use 
+`docker build --platform linux/amd64 -t ollie .`

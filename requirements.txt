@@ -1,22 +1,20 @@
-# --- Core Web Framework ---
-Flask==3.0.3                   # The main web framework
-Flask-CORS==4.0.0              # Essential for connecting React (port 3000) to Flask (port 5000)
+# UI
+nicegui>=1.4.0
 
-# --- LLM and Audio Processing ---
-ollama==0.2.1                  # Python client for communicating with the local Ollama server
-faster-whisper==1.2.1        # Highly efficient Speech-to-Text (STT) model
-piper-tts               # Text-to-Speech (TTS) engine
+# --- LLM  ---
+ollama==0.3.0                  # Python client for communicating with the local Ollama server
 
-# --- Audio I/O and Scientific Computing ---
-sounddevice==0.4.6             # Interface for microphone input and speaker output
-#scipy==1.13.0                  # Scientific computing library (often needed by audio packages)
-numpy==1.26.4                  # Fundamental package for scientific computing with Python
+# Voice
+faster-whisper==1.0.0       # Highly efficient Speech-to-Text (STT) model
+piper-tts>=1.2.0               # Text-to-Speech (TTS) engine
+sounddevice>=0.4.6             # Interface for microphone input and speaker output
+numpy>=1.26.0                  # Fundamental package for scientific computing with Python
 
-#python-dotenv==1.0.0          # For loading environment variables from a .env file
-requests==2.31.0              # For making HTTP requests to Ollama API
-pydantic==2.10.6              # For data validation and settings management
+# Tools
+duckduckgo-search>=6.0.0
+requests>=2.31.0              # For making HTTP requests to Ollama API
+beautifulsoup4>4.12.0
 
-#openwakeword
-#onnxruntime
-duckduckgo-search
-Pillow
+# LCD Display
+luma.oled>=3.13.0
+Pillow>=10.0.0

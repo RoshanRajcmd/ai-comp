@@ -1,43 +1,44 @@
-# Stage 1: Build Stage (Needed for compiling certain Python packages)
-FROM python:3.11-slim AS builder
-
-# Install necessary build tools and audio libraries
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libsndfile1 \
-    libsndfile-dev \
-    libgfortran5 \
-    ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
-WORKDIR /app
-
-# Copy requirements file and install dependencies
-COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
-
-# Stage 2: Final Runtime Stage
 FROM python:3.11-slim
 
-# Install runtime dependencies for audio/science
+WORKDIR /app
+
+# System deps for audio, I2C, and image processing
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    libavformat-dev \
+    libavcodec-dev \
+    libavdevice-dev \
+    libavutil-dev \
+    libswscale-dev \
+    libswresample-dev \
+    libavfilter-dev \
+    libportaudio2 \
+    libasound2-dev \
     libsndfile1 \
-    libgfortran5 \
+    i2c-tools \
+    libi2c-dev \
+    espeak-ng \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
+# Install Piper TTS binary (aarch64 for Pi, amd64 for dev) \
+#ARG TARGETARCH
+#RUN if [ "$TARGETARCH" = "arm64" ]; then \
+#      PIPER_URL="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_aarch64.tar.gz"; \
+#    else \
+#      PIPER_URL="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz"; \
+#    fi && \
+#    wget -qO- "$PIPER_URL" | tar -xz -C /usr/local/bin/
 
-# Copy installed packages from the builder stage
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin/ /usr/local/bin/
+# Python deps
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . /app
+# APP Code
+COPY . .
 
-# The Flask application listens on port 5000
-EXPOSE 5000
+# Expose NiceGUI port
+EXPOSE 8080
 
-# Command is defined in docker-compose.yml
+# Run
+CMD ["python", "app.py"]

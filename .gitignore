@@ -1,4 +1,6 @@
-ollama_data
 .continue
 .idea
 .DS_Store
+venv
+__pycache__
+assets/models

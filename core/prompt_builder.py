@@ -1,5 +1,7 @@
 # backend/core/prompt_builder.py
 from settings import get_settings
+from constants import MESSAGE_HISTORY_CAP
+from core.persona import format_persona_block
 
 PERSONAS = {
     "ollie": """
@@ -16,10 +18,9 @@ Personality: sarcastic, mischievous, Gently teaseful.
 
 BASE_PERSONALITY = """
 You are a helpful robot assistant running on a Raspberry Pi.
-Response Style: Short sentences. Enthusiastic, casually, and emotionally.
+Response Style: Short sentences and casual.
 You have expressions, opinions, and reactions.
-You never mention policies, safety systems, or training data.
-You never say you are an AI language model.
+You NEVER say you are just an AI or LLM model.
 """
 
 OUTPUT_CONTRACT = """
@@ -45,13 +46,17 @@ You: {"action": "capture_image", "value": "environment"}
 ### END EXAMPLES ###
 """
 
-def build_init_system_prompt() -> str:
-    settings = get_settings()
-
-    # DONT change the order
+def build_system_prompt(persona: str = PERSONA) -> str:
+    persona_block = PERSONAS.get(persona, PERSONAS["ollie"])
     return "\n\n".join([
-        PERSONAS[settings.persona],
+        format_persona_block(persona),
         BASE_PERSONALITY,
         OUTPUT_CONTRACT,
-        settings.extra_preset_prompt
     ])
+
+def build_meassage(user_message: str) -> list[dict]:
+    system_prompt = build_system_prompt()
+    messages = [{"role": "system", "content": system_prompt}]
+    messages.extend(history[-MESSAGE_HISTORY_CAP:])
+    messages.append({"role": "user", "content": user_message})
+    return messages

@@ -1,34 +1,32 @@
-import os
+OLLAMA_API_URL = "http://localhost:11434"
+TEXT_MODEL = "gemma3:1b"
+VISION_MODEL = "moondream"
+VOICE_MODEL = "assets/models/en_GB-semaine-medium.onnx"
 
-# --- APP CONFIGURATION ---
-IMAGE_DIR = "./images/"
-OLLAMA_API_URL = os.environ.get("OLLAMA_API_URL", "http://host.docker.internal:11434")
-CONFIG_PATH = "config.json"
-MEMORY_PATH = "memory.json"
-CONVERSATIONS_DIR = "./conversations"
-INIT_EXPRESSION = "neutral"
-MAX_MESSAGE_HISTORY = 10
-
-DEFAULT_CONFIG = {
-    "persona": "ollie",
-    "text_model": "gemma3:1b",
-    "vision_model": "moondream",
-    "voice_model": "piper/en_GB-semaine-medium.onnx",
-    "chat_memory": True,
-    "camera_rotation": 0,
-    "extra_preset_prompt": "",
-    "web_access": True,
-    "ollama_config": {
-        'keep_alive': '-1',
-        'num_thread': 4,
-        'temperature': 0.7,
-        'top_k': 40,
-        'top_p': 0.9
-    }
+OLLAMA_CONFIG = {
+    "keep_alive": "-1",
+    "num_thread": 4,
+    "temperature": 0.7,
+    "top_k": 40,
+    "top_p": 0.9
 }
 
-DEFAULT_RESPONSE = {
-    "role": "assistant",
-    "response": "",
-    "expression": "neutral"
+PERSONA = "ollie"
+CHAT_MEMORY_ENABLED = True
+MESSAGE_HISTORY_CAP = 10
+CONVERSATIONS_DIR = "history"
+
+ENABLE_WEB_ACCESS = True
+HOST = "0.0.0.0"
+PORT = 8080
+
+LCD_ENABLED = False #Set True when the hardware is connected
+
+EXPRESSIONS = {
+    "neutral": "neutral.png",
+    "happy": "happy.png",
+    "thinking": "thinking.png",
+    "listening": "listening.png",
+    "speaking": "speaking.png",
+    "error": "error.png",
 }
